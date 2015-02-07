@@ -1,16 +1,18 @@
-var Vue = require('vue')
+var domReady = require('domready');
+var Vue = require('vue');
+var resource = require('..')
 
-Vue.use(function(Vue) {
-	window.Vue = Vue.prototype
-})
+domReady(function () {
 
-window.app = new Vue({ 
-	resources: function($resource) {
-		var userQuery = $resource('users').query({ name: 'people' }).get(1)
+    Vue.use(resource, { baseUrl: '/api/v0' })
 
-		return {
-			user: userQuery
-		}
-	} 
-}).$mount('#app')
+    window.app = new Vue({
+        resources: function ($resource) {
+            var roomQuery = $resource('rooms').key('room').query({ house: 'White House' }).limit(1)
 
+            return { room: roomQuery }
+        },
+
+        template: '<div> Welcome to {{room.name}} </div>'
+    }).$mount()
+});

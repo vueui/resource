@@ -44,22 +44,24 @@
 /* 0 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var Vue = __webpack_require__(1)
+	var domReady = __webpack_require__(!(function webpackMissingModule() { var e = new Error("Cannot find module \"domready\""); e.code = 'MODULE_NOT_FOUND'; throw e; }()));
+	var Vue = __webpack_require__(1);
+	var resource = __webpack_require__(63)
 
-	Vue.use(function(Vue) {
-		window.Vue = Vue.prototype
-	})
+	domReady(function () {
 
-	window.app = new Vue({ 
-		resources: function($resource) {
-			var userQuery = $resource('users').query({ name: 'people' }).get(1)
+	    Vue.use(resource, { baseUrl: '/api/v0' })
 
-			return {
-				user: userQuery
-			}
-		} 
-	}).$mount('#app')
+	    window.app = new Vue({
+	        resources: function ($resource) {
+	            var roomQuery = $resource('rooms').key('room').query({ house: 'White House' }).limit(1)
 
+	            return { room: roomQuery }
+	        },
+
+	        template: '<div> Welcome to {{room.name}} </div>'
+	    }).$mount()
+	});
 
 
 /***/ },
@@ -8118,6 +8120,15 @@
 	  }
 
 	}
+
+/***/ },
+/* 63 */
+/***/ function(module, exports, __webpack_require__) {
+
+	module.exports = function(Vue, options) {
+
+	}
+
 
 /***/ }
 /******/ ])
