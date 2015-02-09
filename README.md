@@ -4,16 +4,42 @@
 var Vue = require('vue')
 var vueResource = require('vueui-resource')
 
-Vue.use(vueResource, { baseUrl: '/api/v0' })
+var options = {
+	host: '',
+	namespace: '/api/v0',
+	resources: {
+		cats: {
+			path: '/cats',
+			parse: function(res) {
+				return res['data']
+			}
+		},
+		rooms: {
+			path: '/rooms',
+			resources: {
+				equipment: {
+					path: '/{roomId}/equipment'
+				},
+				keys: {
+					path: '/{roomId}/keys'
+				}
+			}
+		},
+		names: {
+			path: '/names/{team}'
+		}
+	}
+}
+
+Vue.use(vueResource, options)
 
 var app = new Vue({
 	resources: function($resource) {
-		var room = $resource('rooms').key('room')
-				.query({ house: 'White House' })
-				.limit(1)
-				.get()
+		var roomQuery = $resource('rooms', 'room').query({ house: 'White House' }).limit(1).find()
+		var	equipmentQuery = $resource('rooms.equipment', 'equipment').params({ roomId: 1 }).find()
+		var keysQuery = $resource('rooms.keys', 'keys').params({ roomId: 1 }).find()
 			
-		return [ room ]
+		return [ roomQuery, equipmentQuery, keysQuery ]
 	}
 })
 ```
@@ -42,7 +68,10 @@ app.$resource('myCat').save().then(function(cat) {
 
 ### Deleting records
 ```js
-
+app.$resource('myCat').delete(true).then(function() {
+	// DELETE /cats/1
+	// app.myCat === null
+})
 ```
 
 ### Reloading records
@@ -51,5 +80,3 @@ app.$resource('myUsers').reload().then(function(users) {
 	// updated users
 })
 ```
-
-
